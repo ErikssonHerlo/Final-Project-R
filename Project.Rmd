@@ -1,0 +1,103 @@
+---
+title: "Proyecto Final"
+authors: 
+    - "Eriksson José Hernández López - 2927 19159 1415"
+    - "Sergio Rolando Hernandez Perez - 3152 87349 0901"
+output: html_document
+---
+
+Estudiantes:
+
+- Eriksson José Hernández López - 2927 19159 1415
+
+- Sergio Rolando Hernandez Perez - 3152 87349 0901
+
+
+Descripción: (Insertar descripción del proyecto aquí)
+
+```{r}
+# Librerías
+library(dplyr)
+library(readr)
+library(ggplot2)
+#library(tidyverse)
+```
+
+## Parte I. Carga y Exploración de Datos
+
+```{r}
+# Cargar el dataset
+cities = read.csv("data/cities.csv")
+meal_types = read.csv("data/meal_types.csv")
+meals = read.csv("data/meals.csv")
+members = read.csv("data/members.csv")
+monthly_member_totals = read.csv("data/monthly_member_totals.csv")
+order_details = read.csv("data/order_details.csv")
+orders = read.csv("data/orders.csv")
+restaurant_types = read.csv("data/restaurant_types.csv")
+restaurants = read.csv("data/restaurants.csv")
+serve_types = read.csv("data/serve_types.csv")
+```
+# Exploración inicial por cada dataset
+```{r}
+# cities
+glimpse(cities)
+summary(cities)
+str(cities)
+head(cities)
+
+# meal_types
+glimpse(meal_types)
+summary(meal_types)
+str(meal_types)
+head(meal_types)
+
+# meals
+glimpse(meals)
+summary(meals)
+str(meals)
+head(meals)
+
+# members
+glimpse(members)
+summary(members)
+str(members)
+head(members)
+
+# monthly_member_totals
+glimpse(monthly_member_totals)
+summary(monthly_member_totals)
+str(monthly_member_totals)
+head(monthly_member_totals)
+
+# order_details
+glimpse(order_details)
+summary(order_details)
+str(order_details)
+head(order_details)
+
+# orders
+glimpse(orders)
+summary(orders)
+str(orders)
+head(orders)
+
+# restaurant_types
+glimpse(restaurant_types)
+summary(restaurant_types)
+str(restaurant_types)
+head(restaurant_types)
+
+# restaurants
+glimpse(restaurants)
+summary(restaurants)
+str(restaurants)
+head(restaurants)
+
+# serve_types
+glimpse(serve_types)
+summary(serve_types)
+str(serve_types)
+head(serve_types)
+
+```
