@@ -595,6 +595,8 @@ trends_barplot <- ggplot(data = trends_summarized, aes(x = restaurant_name, y = 
     y = "Total de pedidos"
   )
 
+trends_barplot
+
 ```
 
 
@@ -606,10 +608,8 @@ trends_barplot_city <- trends_barplot +
   facet_wrap(~city) +
   labs(title = "Total de pedidos por restaurante y comida en cada ciudad")
 
+trends_barplot_city
+
 ```
-
-
-
-
 
 
