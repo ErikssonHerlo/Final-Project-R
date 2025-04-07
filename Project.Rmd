@@ -63,43 +63,33 @@ serve_types <- read_csv("data/serve_types.csv")                      # Tipos de 
 # cities: nombre e identificador de cada ciudad
 glimpse(cities)
 summary(cities)
-
 # meal_types: categorías de los alimentos (ej. Vegan, Chicken)
 glimpse(meal_types)
 summary(meal_types)
-
 # meals: comidas ofrecidas por restaurante
 glimpse(meals)
 summary(meals)
-
 # members: afiliados registrados en el sistema
 glimpse(members)
 summary(members)
-
 # monthly_member_totals: actividad mensual de cada miembro
 glimpse(monthly_member_totals)
 summary(monthly_member_totals)
-
 # order_details: detalle de qué comida fue ordenada en qué pedido
 glimpse(order_details)
 summary(order_details)
-
 # orders: pedidos realizados por los clientes
 glimpse(orders)
 summary(orders)
-
 # restaurant_types: tipo de restaurante (e.g., Fast Food, Gourmet)
 glimpse(restaurant_types)
 summary(restaurant_types)
-
 # restaurants: nombre, tipo y ubicación de cada restaurante
 glimpse(restaurants)
 summary(restaurants)
-
 # serve_types: si es para llevar, en mesa, etc.
 glimpse(serve_types)
 summary(serve_types)
-
 ```
 
 ## Usar str() y head() para ver más detalles y ejemplos concretos
@@ -110,44 +100,33 @@ summary(serve_types)
 # cities
 str(cities)
 head(cities)
-
 # meal_types
 str(meal_types)
 head(meal_types)
-
 # meals
 str(meals)
 head(meals)
-
 # members
 str(members)
 head(members)
-
 # monthly_member_totals
 str(monthly_member_totals)
 head(monthly_member_totals)
-
 # order_details
 str(order_details)
 head(order_details)
-
 # orders
 str(orders)
 head(orders)
-
 # restaurant_types
 str(restaurant_types)
 head(restaurant_types)
-
 # restaurants
 str(restaurants)
 head(restaurants)
-
 # serve_types
 str(serve_types)
 head(serve_types)
-
-
 ```
 
 # Transformando los datos
@@ -188,7 +167,6 @@ monthly_member_totals <- monthly_member_totals %>%
                           labels = c("Enero", "Febrero", "Marzo", "Abril", "Mayo")),
     order_meal_ratio = order_count / meals_count
   )
-
 ```
 
 ## Imprimir la variable modificada con la nueva columna
@@ -219,7 +197,6 @@ ggplot(monthly_member_totals, aes(x = month, y = order_meal_ratio, group = 1)) +
     x = "Mes",
     y = "Proporcion ordenes / comidas"
   )
-
 ```
 
 ## Usar color en la variable month para diferenciar en la gráfica
@@ -236,7 +213,6 @@ ggplot(monthly_member_totals, aes(x = month, y = order_meal_ratio, color = month
     x = "Mes",
     y = "Proporcion ordenes / comidas"
   )
-
 ```
 
 **Relación, selección y ordenamiento de datos**
@@ -300,7 +276,6 @@ member_orders_sorted <- member_orders_selected %>%
 ```{r}
 # Print the first few rows of the sorted and selected data
 print(member_orders_sorted)
-
 ```
 
 
@@ -411,7 +386,6 @@ ggplot(income_by_city, aes(x = city, y = sum_income_percentage)) +
     x = "Ciudad",
     y = "Suma de ingresos (%)"
   )
-
 ```
 
 
@@ -431,7 +405,6 @@ ggplot(income_by_city, aes(x = city, y = sum_income_percentage, fill = city)) +
     fill = "Ciudad"
   ) +
   scale_fill_discrete(name = "Ciudad")
-
 ```
 
 
@@ -471,7 +444,6 @@ restaurant2_filtered_meals <- meals_selected_fields %>%
 # Bar chart for price per serve_type
 ggplot(restaurant2_filtered_meals, aes(x = serve_type, y = price)) +
   geom_bar(stat = "identity")
-
 ```
 
 
@@ -491,7 +463,6 @@ ggplot(restaurant2_filtered_meals, aes(x = serve_type, y = price)) +
     caption = "Fuente: Datos obtenidos de Restaurant 2"
   ) +
   theme_minimal()
-
 ```
 
 **Tendencias de comida por restaurante y ubicación (ciudad)**
@@ -526,7 +497,6 @@ trends_combined_data <- orders %>%
   inner_join(restaurants, by = c("restaurant_id.meal" = "id")) %>%
   inner_join(cities, by = c("city_id" = "id")) %>%
   inner_join(restaurant_types, by = c("restaurant_type_id" = "id"))
-
 ```
 
 
@@ -551,7 +521,6 @@ trends_selected_fields <- trends_combined_data %>%
     total_order,
     order_detail_id = id.details
   )
-
 ```
 
 
@@ -561,7 +530,6 @@ trends_selected_fields <- trends_combined_data %>%
 # Group by city, restaurant, and meal name
 trends_grouped <- trends_selected_fields %>%
   group_by(city, restaurant_name, meal_name)
-
 ```
 
 
@@ -571,7 +539,6 @@ trends_grouped <- trends_selected_fields %>%
 # Summarize total orders per group
 trends_summarized <- trends_grouped %>%
   summarise(totals = sum(total_order), .groups = "drop")
-
 ```
 
 
@@ -580,7 +547,6 @@ trends_summarized <- trends_grouped %>%
 ```{r}
 # Print summarized trends by restaurant and city
 print(trends_summarized)
-
 ```
 
 ## Crear gráfico de barras con restaurantes en eje X y totales en eje Y
@@ -593,7 +559,8 @@ trends_barplot <- ggplot(data = trends_summarized, aes(x = restaurant_name, y = 
     title = "Total de pedidos por restaurante y comida",
     x = "Nombre del restaurante",
     y = "Total de pedidos"
-  )
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 trends_barplot
 
@@ -605,11 +572,45 @@ trends_barplot
 ```{r}
 # Add faceting by city
 trends_barplot_city <- trends_barplot +
-  facet_wrap(~city) +
+  facet_wrap(~city, scales = "free_x") +
   labs(title = "Total de pedidos por restaurante y comida en cada ciudad")
-
 trends_barplot_city
 
 ```
 
+**Análisis estadístico propio**
 
+## Realizar un análisis estadístico propio
+
+> Vamos a analizar si hay alguna diferencia en la distribución del gasto mensual (total_expense) entre hombres y mujeres, usando el dataset monthly_member_totals.
+Agruparemos por sex y visualizaremos la media y la mediana del gasto mensual. Luego usaremos un boxplot para observar la variabilidad.
+
+
+```{r}
+# Group by sex and summarize average and median total expense
+expense_by_sex <- monthly_member_totals %>%
+  group_by(sex) %>%
+  summarise(
+    promedio_gasto = mean(total_expense, na.rm = TRUE),
+    mediana_gasto = median(total_expense, na.rm = TRUE),
+    conteo = n()
+  )
+
+# Print summary table
+print(expense_by_sex)
+
+# Boxplot to visualize the distribution of total_expense by sex
+ggplot(monthly_member_totals, aes(x = sex, y = total_expense, fill = sex)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribucion del gasto mensual por sexo",
+    x = "Sexo",
+    y = "Gasto mensual (total_expense)"
+  ) +
+  theme_minimal()
+
+```
+
+## Conclusión basada en los resultados
+
+> En este paso debes escribir una breve conclusión en base al gráfico y la tabla anterior.
