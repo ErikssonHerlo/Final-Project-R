@@ -1,103 +1,615 @@
 ---
 title: "Proyecto Final"
-authors: 
-    - "Eriksson José Hernández López - 2927 19159 1415"
-    - "Sergio Rolando Hernandez Perez - 3152 87349 0901"
-output: html_document
+date: "`r Sys.Date()`"
+author: 
+    - name: "Eriksson José Hernández López"
+    - name: "Sergio Rolando Hernandez Perez"
+output:
+  html_notebook:
+    toc: true
+    toc_depth: 2
+    theme: darkly
+    number_sections: true
+    fig_caption: true
 ---
 
-Estudiantes:
-
+## Estudiantes
+>
 - Eriksson José Hernández López - 2927 19159 1415
-
 - Sergio Rolando Hernandez Perez - 3152 87349 0901
 
 
-Descripción: (Insertar descripción del proyecto aquí)
+## Descripcion
+En este proyecto, se llevará a cabo un análisis de información recopilada de varios restaurantes, 
+centrándose en datos relacionados como, el tipo de restaurante, ubicación del restaurante, 
+información de los clientes, información de la orden, fecha y hora en que se realiza la orden.
 
+## Objetivo
+Analizar datos de órdenes, clientes y tipos de comida en restaurantes para:
+
+ * Detectar patrones de consumo.
+ * Evaluar rentabilidad.
+ * Proponer mejoras operativas.
+ 
+# Conociendo los datos 
+
+## Carga de paquetes necesarios
 ```{r}
-# Librerías
+# Load required libraries
+library(tidyverse)  # Includes readr, dplyr, ggplot2, etc.
 #library(dplyr)
-#library(readr)
 #library(ggplot2)
-library(tidyverse)
 ```
 
-## Parte I. Carga y Exploración de Datos
+## Lectura de los archivos
 
 ```{r}
-# Cargar el dataset
-cities = read.csv("data/cities.csv")
-meal_types = read.csv("data/meal_types.csv")
-meals = read.csv("data/meals.csv")
-members = read.csv("data/members.csv")
-monthly_member_totals = read.csv("data/monthly_member_totals.csv")
-order_details = read.csv("data/order_details.csv")
-orders = read.csv("data/orders.csv")
-restaurant_types = read.csv("data/restaurant_types.csv")
-restaurants = read.csv("data/restaurants.csv")
-serve_types = read.csv("data/serve_types.csv")
+# Lectura de archivos CSV y asignación a variables
+cities <- read_csv("data/cities.csv")                                # Información de ciudades
+meal_types <- read_csv("data/meal_types.csv")                        # Tipos de comida
+meals <- read_csv("data/meals.csv")                                  # Información sobre comidas
+members <- read_csv("data/members.csv")                              # Información de los clientes (miembros)
+monthly_member_totals <- read_csv("data/monthly_member_totals.csv")  # Totales mensuales por miembro
+order_details <- read_csv("data/order_details.csv")                  # Detalles de los pedidos
+orders <- read_csv("data/orders.csv")                                # Pedidos realizados
+restaurant_types <- read_csv("data/restaurant_types.csv")            # Tipos de restaurante
+restaurants <- read_csv("data/restaurants.csv")                      # Información de restaurantes
+serve_types <- read_csv("data/serve_types.csv")                      # Tipos de servicio (ej. para llevar, en mesa)
 ```
-# Exploración inicial por cada dataset
+##  Impresión y análisis de estructura de datos
+> En este paso observamos la estructura general de cada conjunto de datos con glimpse() y algunas estadísticas descriptivas con summary(). Esto nos ayuda a identificar rápidamente tipos de variables, nombres de columnas y ejemplos de datos.
+
 ```{r}
-# cities
+# cities: nombre e identificador de cada ciudad
 glimpse(cities)
 summary(cities)
+
+# meal_types: categorías de los alimentos (ej. Vegan, Chicken)
+glimpse(meal_types)
+summary(meal_types)
+
+# meals: comidas ofrecidas por restaurante
+glimpse(meals)
+summary(meals)
+
+# members: afiliados registrados en el sistema
+glimpse(members)
+summary(members)
+
+# monthly_member_totals: actividad mensual de cada miembro
+glimpse(monthly_member_totals)
+summary(monthly_member_totals)
+
+# order_details: detalle de qué comida fue ordenada en qué pedido
+glimpse(order_details)
+summary(order_details)
+
+# orders: pedidos realizados por los clientes
+glimpse(orders)
+summary(orders)
+
+# restaurant_types: tipo de restaurante (e.g., Fast Food, Gourmet)
+glimpse(restaurant_types)
+summary(restaurant_types)
+
+# restaurants: nombre, tipo y ubicación de cada restaurante
+glimpse(restaurants)
+summary(restaurants)
+
+# serve_types: si es para llevar, en mesa, etc.
+glimpse(serve_types)
+summary(serve_types)
+
+```
+
+## Usar str() y head() para ver más detalles y ejemplos concretos
+
+> str() nos permite ver la estructura interna de cada objeto (como tipos de datos y clases), mientras que head() muestra las primeras filas de cada tabla para tener una idea concreta del contenido.
+
+```{r}
+# cities
 str(cities)
 head(cities)
 
 # meal_types
-glimpse(meal_types)
-summary(meal_types)
 str(meal_types)
 head(meal_types)
 
 # meals
-glimpse(meals)
-summary(meals)
 str(meals)
 head(meals)
 
 # members
-glimpse(members)
-summary(members)
 str(members)
 head(members)
 
 # monthly_member_totals
-glimpse(monthly_member_totals)
-summary(monthly_member_totals)
 str(monthly_member_totals)
 head(monthly_member_totals)
 
 # order_details
-glimpse(order_details)
-summary(order_details)
 str(order_details)
 head(order_details)
 
 # orders
-glimpse(orders)
-summary(orders)
 str(orders)
 head(orders)
 
 # restaurant_types
-glimpse(restaurant_types)
-summary(restaurant_types)
 str(restaurant_types)
 head(restaurant_types)
 
 # restaurants
-glimpse(restaurants)
-summary(restaurants)
 str(restaurants)
 head(restaurants)
 
 # serve_types
-glimpse(serve_types)
-summary(serve_types)
 str(serve_types)
 head(serve_types)
 
+
 ```
+
+# Transformando los datos
+
+## Convertir la columna sex en factor en members y renombrar niveles
+> En esta sección trabajamos con el dataset de miembros (members) para transformar la columna sex en un factor con niveles más legibles: "Femenino" y "Masculino".
+
+```{r}
+# Convert 'sex' to factor and rename levels
+members <- members %>%
+  mutate(sex = factor(sex, levels = c("F", "M"), labels = c("Femenino", "Masculino")))
+
+```
+
+## Transformar hot_cold en factor en meals y aplicar orden ("cold" < "hot")
+> Aquí usamos la columna hot_cold del dataset meals, que indica si la comida es caliente o fría, y la convertimos en un factor ordenado.
+
+```{r}
+# Convert 'hot_cold' to ordered factor with "cold" < "hot"
+meals <- meals %>%
+  mutate(hot_cold = factor(hot_cold, levels = c("cold", "hot"), ordered = TRUE))
+
+# Validate order comparison
+"cold" < "hot"  # This returns TRUE if the order was applied correctly
+
+```
+
+## Transformar columnas en monthly_member_totals y crear nueva columna
+
+> En este paso, trabajamos con monthly_member_totals. Convertimos sex y month a factores con etiquetas descriptivas, y luego creamos una nueva columna que calcula la proporción de órdenes respecto al número de comidas.
+
+```{r}
+# Transform 'sex' and 'month' to labeled factors and create 'order_meal_ratio'
+monthly_member_totals <- monthly_member_totals %>%
+  mutate(
+    sex = factor(sex, levels = c("F", "M"), labels = c("Femenino", "Masculino")),
+    month = factor(month, levels = c("1", "2", "3", "4", "5"),
+                          labels = c("Enero", "Febrero", "Marzo", "Abril", "Mayo")),
+    order_meal_ratio = order_count / meals_count
+  )
+
+```
+
+## Imprimir la variable modificada con la nueva columna
+> Finalmente imprimimos el dataset transformado para verificar que los cambios se hayan aplicado correctamente.
+
+```{r}
+# Print transformed data with new column
+glimpse(monthly_member_totals)
+head(monthly_member_totals)
+print(monthly_member_totals)
+```
+
+# Comportamiento de los datos
+
+**Evaluando tendencias lineales**
+
+## Graficar la proporción order_count / meals_count como línea
+
+> Creamos una gráfica lineal usando ggplot para visualizar la columna order_meal_ratio a través de los meses.
+
+```{r}
+# Line plot: order_meal_ratio vs. month without color aesthetics
+ggplot(monthly_member_totals, aes(x = month, y = order_meal_ratio, group = 1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Tendencia de la proporcion de ordenes sobre comidas por mes",
+    x = "Mes",
+    y = "Proporcion ordenes / comidas"
+  )
+
+```
+
+## Usar color en la variable month para diferenciar en la gráfica
+
+> Ahora aplicamos color a la variable month para que se diferencien los puntos y líneas en la visualización.
+
+```{r}
+# Line plot with month as color aesthetic
+ggplot(monthly_member_totals, aes(x = month, y = order_meal_ratio, color = month, group = 1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Tendencia mensual de la proporcion de ordenes con color por mes",
+    x = "Mes",
+    y = "Proporcion ordenes / comidas"
+  )
+
+```
+
+**Relación, selección y ordenamiento de datos**
+
+## Identificar los archivos a unir
+
+> Se trabajará con los siguientes archivos:
+
+* cities.csv
+* members.csv
+* orders.csv
+* restaurants.csv
+
+## Usar inner_join() para construir las relaciones correspondientes
+
+> Se combinan los datasets orders, members, cities (dos veces) y restaurants. Esto permite acceder tanto a la ciudad del cliente como a la del restaurante.
+
+```{r}
+# Join orders with members, cities, and restaurants (including restaurant city)
+member_orders_joined <- orders %>%
+  inner_join(members, by = c("member_id" = "id"), suffix = c(".order", ".member")) %>%
+  inner_join(cities, by = c("city_id" = "id"), suffix = c(".member", ".city")) %>%
+  inner_join(restaurants, by = c("restaurant_id" = "id"), suffix = c(".member", ".restaurant")) %>%
+  inner_join(cities, by = c("city_id.restaurant" = "id"), suffix = c(".member", ".restaurant"))
+
+```
+
+##  Usar select() para mostrar los campos especificados
+
+> Seleccionamos los campos solicitados: datos personales, ciudad del miembro, fecha, hora y datos del restaurante.
+
+```{r}
+# Select required fields from the joined data
+member_orders_selected <- member_orders_joined %>%
+  select(
+    first_name,
+    surname,
+    sex,
+    email,
+    city_member = city.member,
+    date,
+    hour,
+    total_order,
+    restaurant_name,
+    city_restaurant = city.restaurant
+  )
+
+
+```
+
+
+## Ordenar ascendentemente por total_order
+```{r}
+# Sort the selected data by total_order in ascending order
+member_orders_sorted <- member_orders_selected %>%
+  arrange(total_order)
+
+```
+
+## Imprimir el resultado ordenado
+```{r}
+# Print the first few rows of the sorted and selected data
+print(member_orders_sorted)
+
+```
+
+
+**Obteniendo el conteo por tipo de comida**
+
+
+## Identificar los archivos que se usarán para la relación
+
+> Se trabajará con los siguientes archivos:
+
+* meals.csv
+* serve_types.csv
+* meal_types.csv
+* restaurants.csv
+* cities.csv
+* restaurant_types.csv
+
+
+## Usar inner_join() para construir las relaciones entre tablas
+
+> Se crea una tabla unificada combinando la información de comidas, tipos de servicio, tipos de comida, restaurantes, tipo de restaurante y ciudad.
+
+```{r}
+# Join meals with serve_types, meal_types, restaurants, restaurant_types, and cities
+meals_detailed_info <- meals %>%
+  inner_join(serve_types, by = c("serve_type_id" = "id"), suffix = c(".meal", ".serve_type")) %>%
+  inner_join(meal_types, by = c("meal_type_id" = "id"), suffix = c(".meal", ".meal_type")) %>%
+  inner_join(restaurants, by = c("restaurant_id" = "id"), suffix = c(".meal", ".restaurant")) %>%
+  inner_join(restaurant_types, by = c("restaurant_type_id" = "id"), suffix = c(".restaurant", ".restaurant_type")) %>%
+  inner_join(cities, by = c("city_id" = "id"), suffix = c(".restaurant", ".city"))
+
+```
+
+
+## Seleccionar los campos especificados
+
+> Extraemos únicamente las columnas relevantes para el análisis del tipo de comida y restaurante.
+
+```{r}
+# Select specified fields from the joined data
+meals_selected_fields <- meals_detailed_info %>%
+  select(
+    restaurant_name,
+    city,
+    restaurant_type,
+    income_persentage,
+    serve_type,
+    meal_type,
+    meal_name,
+    price
+  )
+
+```
+
+
+## Usar count() para obtener el conteo por tipo de comida (meal_type)
+
+```{r}
+# Count the number of meals per meal_type
+meal_type_count <- meals_selected_fields %>%
+  count(meal_type)
+
+```
+
+
+##  Imprimir el conteo obtenido
+
+```{r}
+# Print the result of the count
+print(meal_type_count)
+```
+
+**Comportamiento de ingresos por ciudad**
+
+
+## Agrupar por ciudad y calcular la suma de income_persentage
+
+> Utilizamos la tabla meals_selected_fields (creada en el inciso 3.10) para agrupar por ciudad y sumar el porcentaje de ingresos de los restaurantes.
+
+
+```{r}
+# Group by city and summarize total income percentage
+income_by_city <- meals_selected_fields %>%
+  group_by(city) %>%
+  summarize(sum_income_percentage = sum(income_persentage))
+
+```
+
+##  Imprimir el resultado de la agrupación
+
+```{r}
+# Print the summarized income by city
+print(income_by_city)
+
+```
+
+
+## Crear gráfico de barras con ggplot sin color por ciudad
+
+> Visualizamos los ingresos totales por ciudad en una gráfica de barras simple.
+
+```{r}
+# Bar chart of total income percentage per city (without color)
+ggplot(income_by_city, aes(x = city, y = sum_income_percentage)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Grafica de ingresos por ciudad",
+    x = "Ciudad",
+    y = "Suma de ingresos (%)"
+  )
+
+```
+
+
+
+## Agregar color a la variable city en la estética del gráfico
+
+> Ahora aplicamos color a cada barra según la ciudad.
+
+```{r}
+# Bar chart with city-colored fill
+ggplot(income_by_city, aes(x = city, y = sum_income_percentage, fill = city)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Grafica de ingresos por ciudad (coloreada)",
+    x = "Ciudad",
+    y = "Suma de ingresos (%)",
+    fill = "Ciudad"
+  ) +
+  scale_fill_discrete(name = "Ciudad")
+
+```
+
+
+**Conociendo la tendencia de consumo en un restaurante en particular**
+
+## Filtrar los datos con condiciones específicas
+
+> Filtramos la tabla meals_selected_fields para quedarnos únicamente con:
+
+
+* meal_type igual a "Vegan" o "Chicken"
+* restaurant_name igual a "Restaurant 2"
+* price mayor a 30
+
+```{r}
+# Filter meals by specific conditions
+restaurant2_filtered_meals <- meals_selected_fields %>%
+  filter(
+    meal_type %in% c("Vegan", "Chicken"),
+    restaurant_name == "Restaurant 2",
+    price > 30
+  )
+
+```
+
+##  Guardar el resultado filtrado en una nueva variable
+
+> El resultado ya fue guardado en restaurant2_filtered_meals, por lo que este inciso ya está cubierto.
+
+
+## Crear gráfico de barras con serve_type en eje X y price en eje Y
+
+> Mostramos los precios de los distintos tipos de servicio (ej. para llevar, en mesa) para las comidas filtradas.
+
+
+```{r}
+# Bar chart for price per serve_type
+ggplot(restaurant2_filtered_meals, aes(x = serve_type, y = price)) +
+  geom_bar(stat = "identity")
+
+```
+
+
+##  Agregar título, subtítulo y etiquetas usando labs()
+
+> Aplicamos etiquetas descriptivas al gráfico generado, usando labs().
+
+```{r}
+# Add labels and style to the previous bar chart
+ggplot(restaurant2_filtered_meals, aes(x = serve_type, y = price)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Grafico de precios por tipo de servicio en Restaurant 2",
+    subtitle = "Comidas veganas y de pollo con precio mayor a 30",
+    x = "Tipo de Servicio",
+    y = "Precio",
+    caption = "Fuente: Datos obtenidos de Restaurant 2"
+  ) +
+  theme_minimal()
+
+```
+
+**Tendencias de comida por restaurante y ubicación (ciudad)**
+
+
+## Identificar archivos para la relación de tendencias por ciudad y restaurante
+
+> Los archivos a utilizar seran:
+
+* cities.csv
+* restaurants.csv
+* restaurant_types.csv
+* orders.csv
+* meals.csv
+* serve_types.csv
+* meal_types.csv
+* order_details.csv
+
+
+##  Construir las relaciones entre los datasets con inner_join()
+
+> Unimos los datos para obtener una tabla que combine información de órdenes, comidas, tipos de comida y servicio, y ubicación del restaurante.
+
+
+```{r}
+# Join orders with all relevant datasets to analyze trends
+trends_combined_data <- orders %>%
+  inner_join(order_details, by = c("id" = "order_id"), suffix = c(".order", ".details")) %>%
+  inner_join(meals, by = c("meal_id" = "id"), suffix = c(".order", ".meal")) %>%
+  inner_join(serve_types, by = c("serve_type_id" = "id")) %>%
+  inner_join(meal_types, by = c("meal_type_id" = "id")) %>%
+  inner_join(restaurants, by = c("restaurant_id.meal" = "id")) %>%
+  inner_join(cities, by = c("city_id" = "id")) %>%
+  inner_join(restaurant_types, by = c("restaurant_type_id" = "id"))
+
+```
+
+
+## Seleccionar los campos especificados para el análisis
+
+> Nos quedamos con las columnas necesarias para visualizar tendencias por restaurante y ciudad.
+
+```{r}
+# Select specified fields from the joined data
+trends_selected_fields <- trends_combined_data %>%
+  select(
+    restaurant_name,
+    city,
+    restaurant_type,
+    income_persentage,
+    serve_type,
+    meal_type,
+    meal_name,
+    price,
+    date,
+    hour,
+    total_order,
+    order_detail_id = id.details
+  )
+
+```
+
+
+## Agrupar por city, restaurant_name y meal_name
+
+```{r}
+# Group by city, restaurant, and meal name
+trends_grouped <- trends_selected_fields %>%
+  group_by(city, restaurant_name, meal_name)
+
+```
+
+
+## Sumarizar total_order y asignar etiqueta totals
+
+```{r}
+# Summarize total orders per group
+trends_summarized <- trends_grouped %>%
+  summarise(totals = sum(total_order), .groups = "drop")
+
+```
+
+
+## Guardar el resultado y mostrarlo
+
+```{r}
+# Print summarized trends by restaurant and city
+print(trends_summarized)
+
+```
+
+## Crear gráfico de barras con restaurantes en eje X y totales en eje Y
+
+```{r}
+# Bar chart: total orders per restaurant
+trends_barplot <- ggplot(data = trends_summarized, aes(x = restaurant_name, y = totals)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Total de pedidos por restaurante y comida",
+    x = "Nombre del restaurante",
+    y = "Total de pedidos"
+  )
+
+```
+
+
+## Aplicar faceting por ciudad para dividir el gráfico
+
+```{r}
+# Add faceting by city
+trends_barplot_city <- trends_barplot +
+  facet_wrap(~city) +
+  labs(title = "Total de pedidos por restaurante y comida en cada ciudad")
+
+```
+
+
+
+
+
+
