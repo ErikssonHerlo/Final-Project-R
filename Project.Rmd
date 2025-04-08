@@ -610,6 +610,82 @@ ggplot(monthly_member_totals, aes(x = sex, y = total_expense, fill = sex)) +
   theme_minimal()
 
 ```
+### Segundo Análisis estadístico propio (Amplio)
+
+> Vamos a analizar el gasto total (total_order) por tipo de comida (meal_type) en cada ciudad. Este análisis integra:
+
+  >> Un análisis que muestre cuánto dinero se ha gastado en cada tipo de comida, por ciudad, integrando todas las tablas relevantes.
+Pero esta vez lo hacemos de una forma más estructurada y profesional, usando nombres de columnas con prefijos (como orders.date o meals.price), para que sea súper claro de qué tabla viene cada dato.
+
+* Múltiples inner_join() y select() para crear una base consolidada y filtrar.
+* group_by() y summarise() para agregar datos.
+* arrange() para ordenarlos.
+* Un gráfico con ggplot2 completo: título, subtítulo, leyenda, etiquetas, facet_wrap().
+* Función renombra todas las columnas de un dataframe agregándoles un prefijo con el nombre de la tabla.
+
+
+```{r}
+# Función para prefijar columnas con el nombre de la tabla
+prefix_columns <- function(df, table_name) {
+  names(df) <- paste0(table_name, ".", names(df))
+  return(df)
+}
+
+# Cargar y renombrar antes del join
+orders_prefixed <- prefix_columns(orders, "orders")
+order_details_prefixed <- prefix_columns(order_details, "order_details")
+meals_prefixed <- prefix_columns(meals, "meals")
+restaurants_prefixed <- prefix_columns(restaurants, "restaurants")
+meal_types_prefixed <- prefix_columns(meal_types, "meal_types")
+cities_prefixed <- prefix_columns(cities, "cities")
+
+# Hacer los join usando las columnas renombradas
+meal_expense_analysis <- orders_prefixed %>%
+  inner_join(order_details_prefixed, by = c("orders.id" = "order_details.order_id")) %>%
+  inner_join(meals_prefixed, by = c("order_details.meal_id" = "meals.id")) %>%
+  inner_join(restaurants_prefixed, by = c("orders.restaurant_id" = "restaurants.id")) %>%
+  inner_join(meal_types_prefixed, by = c("meals.meal_type_id" = "meal_types.id")) %>%
+  inner_join(cities_prefixed, by = c("restaurants.city_id" = "cities.id"))
+
+meal_expense_analysis_selected <- meal_expense_analysis %>%
+  select(
+    orders.id,
+    orders.date,
+    orders.total_order,
+    meals.meal_name,
+    meals.price,
+    restaurants.restaurant_name,
+    meal_types.meal_type,
+    cities.city
+  )
+
+head(meal_expense_analysis_selected)
+
+# Group by city and meal_type, then summarize total_order
+expense_by_meal_and_city <- meal_expense_analysis_selected %>%
+  group_by(cities.city, meal_types.meal_type) %>%
+  summarise(total_gastado = sum(orders.total_order, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(total_gastado))
+
+print(expense_by_meal_and_city)
+
+# Bar chart with facets by city
+ggplot(expense_by_meal_and_city, aes(x = meal_types.meal_type, y = total_gastado, fill = meal_types.meal_type)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~cities.city) +
+  labs(
+    title = "Total gastado por tipo de comida en cada ciudad",
+    subtitle = "Análisis combinado de órdenes, comidas y ubicación",
+    x = "Tipo de comida",
+    y = "Total gastado (Q)",
+    fill = "Tipo de comida",
+    caption = "Fuente: Datos de órdenes y comidas (proyecto USAC)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
 
 ## Conclusión basada en los resultados
 
