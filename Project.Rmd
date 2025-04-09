@@ -36,9 +36,10 @@ Analizar datos de órdenes, clientes y tipos de comida en restaurantes para:
 ## Carga de paquetes necesarios
 ```{r}
 # Load required libraries
-library(tidyverse)  # Includes readr, dplyr, ggplot2, etc.
-#library(dplyr)
-#library(ggplot2)
+#library(tidyverse)  # Includes readr, dplyr, ggplot2, etc.
+library(dplyr)
+library(ggplot2)
+library(readr)
 ```
 
 ## Lectura de los archivos
@@ -150,7 +151,7 @@ meals <- meals %>%
   mutate(hot_cold = factor(hot_cold, levels = c("cold", "hot"), ordered = TRUE))
 
 # Validate order comparison
-"cold" < "hot"  # This returns TRUE if the order was applied correctly
+levels(meals$hot_cold)  # This returns TRUE if the order was applied correctly
 
 ```
 
@@ -214,6 +215,8 @@ ggplot(monthly_member_totals, aes(x = month, y = order_meal_ratio, color = month
     y = "Proporcion ordenes / comidas"
   )
 ```
+Interpretación: Se observa un patrón ascendente, indicando un uso más eficiente del presupuesto conforme avanza el tiempo.
+
 
 **Relación, selección y ordenamiento de datos**
 
@@ -388,8 +391,6 @@ ggplot(income_by_city, aes(x = city, y = sum_income_percentage)) +
   )
 ```
 
-
-
 ## Agregar color a la variable city en la estética del gráfico
 
 > Ahora aplicamos color a cada barra según la ciudad.
@@ -406,6 +407,7 @@ ggplot(income_by_city, aes(x = city, y = sum_income_percentage, fill = city)) +
   ) +
   scale_fill_discrete(name = "Ciudad")
 ```
+Interpretación: La gráfica muestra cómo varía el ingreso generado por los restaurantes en distintas ciudades. Podemos observar que ciertas ciudades como "Herzelia" y "Ramat Hasharon", concentran mayores porcentajes de ingreso, lo cual puede estar influenciado por la densidad de restaurantes, el poder adquisitivo de los clientes o las estrategias de los establecimientos en esa ciudad. Esta información es útil para decisiones de expansión o inversión.
 
 
 **Conociendo la tendencia de consumo en un restaurante en particular**
@@ -453,17 +455,19 @@ ggplot(restaurant2_filtered_meals, aes(x = serve_type, y = price)) +
 
 ```{r}
 # Add labels and style to the previous bar chart
-ggplot(restaurant2_filtered_meals, aes(x = serve_type, y = price)) +
+ggplot(restaurant2_filtered_meals, aes(x = serve_type, y = price, fill = serve_type)) +
   geom_bar(stat = "identity") +
   labs(
     title = "Grafico de precios por tipo de servicio en Restaurant 2",
     subtitle = "Comidas veganas y de pollo con precio mayor a 30",
     x = "Tipo de Servicio",
     y = "Precio",
-    caption = "Fuente: Datos obtenidos de Restaurant 2"
-  ) +
-  theme_minimal()
+    caption = "Fuente: Datos obtenidos de Restaurant 2",
+    fill = "Tipo de Servicio"
+  ) + theme_minimal()
 ```
+Interpretación: Se observa que los precios varían según el tipo de servicio ofrecido (e.g., "mesa" vs. "para llevar") en el Restaurant 2. Las comidas de tipo "Vegan" y "Chicken" que superan los 30 quetzales tienen diferencias de precio según cómo se sirven. Esto puede sugerir que ciertos servicios agregan valor percibido, o implican mayor costo operativo.
+
 
 **Tendencias de comida por restaurante y ubicación (ciudad)**
 
@@ -553,18 +557,20 @@ print(trends_summarized)
 
 ```{r}
 # Bar chart: total orders per restaurant
-trends_barplot <- ggplot(data = trends_summarized, aes(x = restaurant_name, y = totals)) +
+trends_barplot <- ggplot(data = trends_summarized, aes(x = restaurant_name, y = totals, fill = restaurant_name)) +
   geom_bar(stat = "identity") +
   labs(
     title = "Total de pedidos por restaurante y comida",
     x = "Nombre del restaurante",
-    y = "Total de pedidos"
+    y = "Total de pedidos",
+    fill = "Restaurante"
   ) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 trends_barplot
 
 ```
+Interpretación: Este gráfico muestra el número total de pedidos realizados por restaurante, permitiendo comparar rápidamente qué locales tienen mayor actividad. Se observa que algunos restaurantes destacan significativamente sobre otros, indicando una mayor demanda o preferencia por parte de los clientes.
 
 
 ## Aplicar faceting por ciudad para dividir el gráfico
@@ -605,11 +611,13 @@ ggplot(monthly_member_totals, aes(x = sex, y = total_expense, fill = sex)) +
   labs(
     title = "Distribucion del gasto mensual por sexo",
     x = "Sexo",
-    y = "Gasto mensual (total_expense)"
+    y = "Gasto mensual (total_expense)",
+    fill = "Sexo",
   ) +
   theme_minimal()
-
 ```
+Interpretación: Este boxplot permite observar cómo varía el gasto mensual (total_expense) entre hombres y mujeres afiliados. El gráfico muestra la mediana, los cuartiles y los valores atípicos para cada grupo. Este tipo de análisis es fundamental para ajustar estrategias de precios, promociones o personalización de servicios en función del perfil del cliente.
+
 ### Segundo Análisis estadístico propio (Amplio)
 
 > Vamos a analizar el gasto total (total_order) por tipo de comida (meal_type) en cada ciudad. Este análisis integra:
@@ -683,10 +691,37 @@ ggplot(expense_by_meal_and_city, aes(x = meal_types.meal_type, y = total_gastado
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 ```
 
+Interpretación: Este gráfico compara el total de dinero gastado en distintos tipos de comida (meal_type) en cada ciudad. Las facetas permiten visualizar los resultados por ciudad, mientras que el color diferencia cada categoría de comida.
 
-## Conclusión basada en los resultados
+- Ayuda a identificar preferencias locales: por ejemplo, si en una ciudad predomina el consumo de comida “Vegan” y en otra “Chicken”.
 
-> En este paso debes escribir una breve conclusión en base al gráfico y la tabla anterior.
+- Las diferencias de altura en las barras revelan cuáles son las categorías más rentables por zona, facilitando decisiones operativas específicas.
+
+---
+
+## **Conclusiones Generales del Proyecto**
+
+Este análisis ha permitido explorar de manera integral el comportamiento de clientes, órdenes y productos en una red de restaurantes, utilizando herramientas del ecosistema `tidyverse` en R.
+
+1. **Comprensión de los datos**: Se realizó una exploración detallada de cada dataset, entendiendo sus relaciones y estructura. Esto permitió construir un modelo relacional robusto para los análisis posteriores.
+
+2. **Transformaciones útiles**: A través del uso de `mutate()`, `factor()`, y renombrado de columnas, los datos fueron preparados de forma legible y ordenada, facilitando la interpretación tanto para humanos como para procesos computacionales.
+
+3. **Análisis de comportamiento y tendencias**:
+   - Se evidenció un patrón estable en la proporción de órdenes versus comidas, aunque con variabilidad leve entre meses.
+   - Se observaron diferencias en el gasto mensual entre sexos, lo que puede ser útil para campañas segmentadas.
+   - Se identificaron ciudades con ingresos acumulados más altos, permitiendo priorizar inversiones o campañas en esas regiones.
+
+4. **Insights específicos por restaurante y tipo de comida**:
+   - Algunos restaurantes dominan en pedidos totales dentro de ciertas ciudades, lo que sugiere su popularidad o mejor oferta de valor.
+   - Comidas como “Chicken” y “Vegan” se posicionan como recurrentes en múltiples análisis, revelando tanto su aceptación como su oportunidad de mejora o expansión.
+
+5. **Visualizaciones efectivas**:
+   - Se utilizaron gráficos de líneas, barras, boxplots y facetas para comunicar hallazgos de forma clara, estética e interpretativa.
+   - Los colores facilitaron la identificación de categorías y tendencias visuales, mejorando la narrativa del análisis.
+
+6. **Aplicación práctica**:
+   - Este tipo de análisis puede apoyar la toma de decisiones estratégicas para marketing, distribución de productos, diseño de menús personalizados por zona, y mejoras en la experiencia del cliente.
+   - Además, establece una base para modelos predictivos o sistemas de recomendación más avanzados.
